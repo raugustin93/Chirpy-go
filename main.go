@@ -10,19 +10,6 @@ type apiConfig struct {
 	fileserverHits int
 }
 
-func (cfg *apiConfig) middlewareMetricsInc(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		cfg.fileserverHits++
-		next.ServeHTTP(w, r)
-	})
-}
-
-func (cfg *apiConfig) handlerMetrics(w http.ResponseWriter, r *http.Request) {
-	w.Header().Add("Content-Type", "text/plain; charset=utf-8")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(fmt.Sprintf("Hits: %v", cfg.fileserverHits)))
-}
-
 func main() {
 	const port = "8080"
 	const filepathRoot = "."
@@ -32,9 +19,9 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.Handle("/app/*", http.StripPrefix("/app", cfg.middlewareMetricsInc(fileServerHandler)))
-	mux.HandleFunc("/healthz", handleReadiness)
-	mux.HandleFunc("/metrics", cfg.handlerMetrics)
-	mux.HandleFunc("/reset", cfg.HandlerReset)
+	mux.HandleFunc("GET /api/healthz", handleReadiness)
+	mux.HandleFunc("GET /admin/metrics", cfg.handlerMetrics)
+	mux.HandleFunc("GET /api/reset", cfg.HandlerReset)
 
 	server := &http.Server{
 		Addr:    ":" + port,
