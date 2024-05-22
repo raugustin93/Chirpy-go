@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
 	"net/http"
 	"strings"
 )
@@ -30,17 +29,12 @@ func validate_chirp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cleaned_body := params.Body
-
-	hasProfanity := profanity(params)
-	if hasProfanity != nil {
-		cleaned_body = hasProfanity.Error()
-	}
+	cleaned_body := clean_up_profanity(params)
 
 	respondWithJSON(w, http.StatusOK, returnVals{CleanedBody: cleaned_body})
 }
 
-func profanity(params parameters) error {
+func clean_up_profanity(params parameters) string {
 	body := strings.Split(params.Body, " ")
 	badWords := []string{"kerfuffle", "sharbert", "fornax"}
 	for _, badWord := range badWords {
@@ -50,8 +44,5 @@ func profanity(params parameters) error {
 			}
 		}
 	}
-	if params.Body != strings.Join(body, " ") {
-		return errors.New(strings.Join(body, " "))
-	}
-	return nil
+	return strings.Join(body, " ")
 }
