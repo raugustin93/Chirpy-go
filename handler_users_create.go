@@ -4,12 +4,13 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/raugustin93/Chirpy-go/internal/db"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func (cfg *apiConfig) handlerUsersCreate(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
-		Email string `json:"email"`
+		Email    string `json:"email"`
+		Password string `json:"password"`
 	}
 
 	decoder := json.NewDecoder(r.Body)
@@ -22,13 +23,37 @@ func (cfg *apiConfig) handlerUsersCreate(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	user, err := cfg.DB.CreateUser(params.Email)
+	emails, err := cfg.DB.GetEmails()
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	for _, email := range emails {
+		if params.Email == email {
+			respondWithError(w, http.StatusUnauthorized, "Email already exists")
+			return
+		}
+	}
+
+	password := []byte(params.Password)
+
+	hashedPassword, err := bcrypt.GenerateFromPassword(password, bcrypt.DefaultCost)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Couldn't hash password")
+		return
+	}
+
+	user, err := cfg.DB.CreateUser(params.Email, string(hashedPassword))
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Couldn't create a user")
 		return
 	}
 
-	respondWithJSON(w, http.StatusCreated, db.User{
+	respondWithJSON(w, http.StatusCreated, struct {
+		Id    int    `json:"id"`
+		Email string `json:"email"`
+	}{
 		Id:    user.Id,
 		Email: user.Email,
 	})

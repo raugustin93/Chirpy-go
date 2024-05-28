@@ -1,6 +1,6 @@
 package db
 
-func (db *DB) CreateUser(body string) (User, error) {
+func (db *DB) CreateUser(body, password string) (User, error) {
 	dbStructure, err := db.loadDB()
 	if err != nil {
 		return User{}, err
@@ -8,8 +8,9 @@ func (db *DB) CreateUser(body string) (User, error) {
 
 	id := len(dbStructure.Users) + 1
 	user := User{
-		Id:    id,
-		Email: body,
+		Id:       id,
+		Email:    body,
+		Password: password,
 	}
 	dbStructure.Users[id] = user
 
