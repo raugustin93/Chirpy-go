@@ -4,16 +4,29 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
+	"github.com/joho/godotenv"
 	"github.com/raugustin93/Chirpy-go/internal/db"
 )
 
 type apiConfig struct {
 	fileserverHits int
 	DB             *db.DB
+	JwtSecret      []byte
 }
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	secretKey := os.Getenv("JWT_SECRET")
+	if secretKey == "" {
+		log.Fatal("JWT Secret is not set")
+	}
+
 	const port = "8080"
 	const filepathRoot = "."
 
@@ -27,6 +40,7 @@ func main() {
 	cfg := apiConfig{
 		fileserverHits: 0,
 		DB:             DB,
+		JwtSecret:      []byte(secretKey),
 	}
 
 	mux := http.NewServeMux()
