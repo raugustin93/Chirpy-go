@@ -74,18 +74,7 @@ func (db *DB) GetEmails() ([]string, error) {
 	defer db.Mux.RUnlock()
 
 	emails := []string{}
-	//
-	// dbStructure := DBStructure{}
-	// data, err := os.ReadFile(db.Path)
-	// if errors.Is(err, os.ErrNotExist) {
-	// 	return emails, err
-	// }
-	//
-	// err = json.Unmarshal(data, &dbStructure)
-	// if err != nil {
-	// 	return emails, err
-	// }
-	//
+
 	dbStructure, err := db.loadDB()
 	if err != nil {
 		return emails, err
