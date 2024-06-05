@@ -6,7 +6,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/golang-jwt/jwt/v5"
+	"github.com/raugustin93/Chirpy-go/internal/auth"
+	"github.com/raugustin93/Chirpy-go/internal/db"
 )
 
 func (cfg *apiConfig) HandleLogin(w http.ResponseWriter, r *http.Request) {
@@ -17,9 +18,10 @@ func (cfg *apiConfig) HandleLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var response struct {
-		Email string `json:"email"`
-		Id    int    `json:"id"`
-		Token string `json:"token"`
+		Email        string `json:"email"`
+		Id           int    `json:"id"`
+		Token        string `json:"token"`
+		RefreshToken string `json:"refresh_token"`
 	}
 
 	params := parameters{}
@@ -37,11 +39,21 @@ func (cfg *apiConfig) HandleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := createJWT(strconv.Itoa(user.Id), cfg.JwtSecret, params.ExpiresInSeconds)
+	token, err := auth.CreateJWT(strconv.Itoa(user.Id), cfg.JwtSecret, params.ExpiresInSeconds)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Couldn't get jwt token")
 		return
 
+	}
+
+	tokenString, err := auth.CreateRefreshToken()
+	if err == nil {
+		response.RefreshToken = tokenString
+		_ = cfg.DB.InsertRefreshToken(db.RefreshToken{
+			Token:          tokenString,
+			UserId:         user.Id,
+			ExpirationTime: time.Now().AddDate(0, 0, 60),
+		})
 	}
 
 	response.Email = user.Email
@@ -49,31 +61,4 @@ func (cfg *apiConfig) HandleLogin(w http.ResponseWriter, r *http.Request) {
 	response.Token = token
 
 	respondWithJSON(w, http.StatusOK, response)
-}
-
-func createJWT(userId string, secretKey []byte, expiresInSeconds *int) (string, error) {
-	defaultExpiration := int64(24 * (time.Hour / time.Second))
-	expirationTime := defaultExpiration
-
-	if expiresInSeconds != nil {
-		if *expiresInSeconds < int(defaultExpiration) {
-			expirationTime = int64(*expiresInSeconds)
-		}
-	}
-
-	claims := &jwt.RegisteredClaims{
-		Issuer:    "chirpy",
-		IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
-		ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(time.Duration(expirationTime) * time.Second)),
-		Subject:   userId,
-	}
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-
-	signedToken, err := token.SignedString(secretKey)
-	if err != nil {
-		return "", err
-	}
-
-	return signedToken, nil
 }

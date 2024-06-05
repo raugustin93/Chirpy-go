@@ -74,10 +74,12 @@ func (cfg *apiConfig) HandlerUsersUpdate(w http.ResponseWriter, r *http.Request)
 func getTokenStringFromHeader(r *http.Request) (string, error) {
 	authHeader := r.Header.Get("Authorization")
 	if authHeader == "" {
-		return "", errors.New("Authorization header is missing")
+		return "", errors.New("no auth header included in request")
+	}
+	splitAuth := strings.Split(authHeader, " ")
+	if len(splitAuth) < 2 || splitAuth[0] != "Bearer" {
+		return "", errors.New("malformed authorization header")
 	}
 
-	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-
-	return tokenString, nil
+	return splitAuth[1], nil
 }

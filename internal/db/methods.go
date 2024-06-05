@@ -11,8 +11,9 @@ import (
 
 func (db *DB) createDB() error {
 	dbStructure := DBStructure{
-		Chips: map[int]Chirp{},
-		Users: map[int]User{},
+		Chips:        map[int]Chirp{},
+		Users:        map[int]User{},
+		RefreshToken: map[string]RefreshToken{},
 	}
 	return db.writeDB(dbStructure)
 }

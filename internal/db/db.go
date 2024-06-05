@@ -1,6 +1,9 @@
 package db
 
-import "sync"
+import (
+	"sync"
+	"time"
+)
 
 type DB struct {
 	Path string
@@ -18,7 +21,14 @@ type User struct {
 	Password string `json:"password"`
 }
 
+type RefreshToken struct {
+	Token          string    `json:"token"`
+	UserId         int       `json:"userId"`
+	ExpirationTime time.Time `json:"expirationTime"`
+}
+
 type DBStructure struct {
-	Chips map[int]Chirp `json:"chirps"`
-	Users map[int]User  `json:"users"`
+	Chips        map[int]Chirp           `json:"chirps"`
+	Users        map[int]User            `json:"users"`
+	RefreshToken map[string]RefreshToken `json:"refresh_tokens"`
 }
