@@ -5,12 +5,9 @@ import (
 	"errors"
 	"net/http"
 	"strings"
-)
 
-type Chirp struct {
-	ID   int    `json:"id"`
-	Body string `json:"body"`
-}
+	"github.com/raugustin93/Chirpy-go/internal/db"
+)
 
 func (cfg *apiConfig) handlerChirpsCreate(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
@@ -31,15 +28,28 @@ func (cfg *apiConfig) handlerChirpsCreate(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	chirp, err := cfg.DB.CreateChirp(cleaned)
+	tokenString, err := getTokenStringFromHeader(r)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	userId, err := cfg.GetUserIdFromTokenString(tokenString)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	chirp, err := cfg.DB.CreateChirp(cleaned, userId)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Couldn't create chirp")
 		return
 	}
 
-	respondWithJSON(w, http.StatusCreated, Chirp{
-		ID:   chirp.Id,
-		Body: chirp.Body,
+	respondWithJSON(w, http.StatusCreated, db.Chirp{
+		Id:       chirp.Id,
+		Body:     chirp.Body,
+		AuthorId: userId,
 	})
 }
 

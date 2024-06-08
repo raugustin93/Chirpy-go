@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"sort"
 	"strconv"
+
+	"github.com/raugustin93/Chirpy-go/internal/db"
 )
 
 func (cfg *apiConfig) handlerChirpsRetrieve(w http.ResponseWriter, r *http.Request) {
@@ -13,16 +15,17 @@ func (cfg *apiConfig) handlerChirpsRetrieve(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	chirps := []Chirp{}
+	chirps := []db.Chirp{}
 	for _, dbChirp := range dbChirps {
-		chirps = append(chirps, Chirp{
-			ID:   dbChirp.Id,
-			Body: dbChirp.Body,
+		chirps = append(chirps, db.Chirp{
+			Id:       dbChirp.Id,
+			Body:     dbChirp.Body,
+			AuthorId: dbChirp.AuthorId,
 		})
 	}
 
 	sort.Slice(chirps, func(i, j int) bool {
-		return chirps[i].ID < chirps[j].ID
+		return chirps[i].Id < chirps[j].Id
 	})
 
 	respondWithJSON(w, http.StatusOK, chirps)
@@ -42,8 +45,8 @@ func (cfg *apiConfig) handlerChirpsGet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respondWithJSON(w, http.StatusOK, Chirp{
-		ID:   dbChirp.Id,
+	respondWithJSON(w, http.StatusOK, db.Chirp{
+		Id:   dbChirp.Id,
 		Body: dbChirp.Body,
 	})
 }

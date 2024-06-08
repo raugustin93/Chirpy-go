@@ -47,3 +47,7 @@ func (db *DB) DeleteRefreshToken(token string) error {
 
 	return nil
 }
+
+// func (db *DB) GetUserFromToken(tokenString string)(User,error){
+//
+// }
