@@ -10,9 +10,10 @@ func (db *DB) CreateUser(body, password string) (User, error) {
 
 	id := len(dbStructure.Users) + 1
 	user := User{
-		Id:       id,
-		Email:    body,
-		Password: password,
+		Id:          id,
+		Email:       body,
+		Password:    password,
+		IsChirpyRed: false,
 	}
 	dbStructure.Users[id] = user
 
@@ -25,9 +26,6 @@ func (db *DB) CreateUser(body, password string) (User, error) {
 }
 
 func (db *DB) UpdateUser(user User) error {
-	// db.Mux.Lock()
-	// defer db.Mux.Lock()
-
 	dbStructure, err := db.loadDB()
 	if err != nil {
 		return err
@@ -40,7 +38,7 @@ func (db *DB) UpdateUser(user User) error {
 	index := getUserIndex(dbStructure, user)
 
 	if index < 0 {
-		errors.New("Id not found")
+		return errors.New("id not found")
 	}
 
 	dbStructure.Users[index] = user
@@ -65,7 +63,7 @@ func (db *DB) GetUser(userId int) (User, error) {
 		}
 	}
 
-	return User{}, errors.New("Couldn't find user with that user id")
+	return User{}, errors.New("couldn't find user with that user id")
 }
 
 func userExists(dbStructure DBStructure, user User) bool {
@@ -84,4 +82,17 @@ func getUserIndex(dbStructure DBStructure, user User) int {
 		}
 	}
 	return -1
+}
+
+func (db *DB) EnableChirpyRedForUser(userId int) error {
+	user, err := db.GetUser(userId)
+	if err != nil {
+		return err
+	}
+	user.IsChirpyRed = true
+	err = db.UpdateUser(user)
+	if err != nil {
+		return err
+	}
+	return nil
 }

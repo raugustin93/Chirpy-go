@@ -14,6 +14,7 @@ type apiConfig struct {
 	fileserverHits int
 	DB             *db.DB
 	JwtSecret      []byte
+	PolkaSecret    []byte
 }
 
 func main() {
@@ -25,6 +26,11 @@ func main() {
 	secretKey := os.Getenv("JWT_SECRET")
 	if secretKey == "" {
 		log.Fatal("JWT Secret is not set")
+	}
+
+	apiKey := os.Getenv("POLKA_SECRET")
+	if apiKey == "" {
+		log.Fatal("Polka Secret is not set")
 	}
 
 	const port = "8080"
@@ -41,6 +47,7 @@ func main() {
 		fileserverHits: 0,
 		DB:             DB,
 		JwtSecret:      []byte(secretKey),
+		PolkaSecret:    []byte(apiKey),
 	}
 
 	mux := http.NewServeMux()
@@ -57,6 +64,7 @@ func main() {
 	mux.HandleFunc("POST /api/refresh", cfg.HandlerRefreshToken)
 	mux.HandleFunc("POST /api/revoke", cfg.HandlerRevokeToken)
 	mux.HandleFunc("DELETE /api/chirps/{chirpID}", cfg.HandlerChirpDelete)
+	mux.HandleFunc("POST /api/polka/webhooks", cfg.HandlerPolkaWebhooks)
 
 	server := &http.Server{
 		Addr:    ":" + port,

@@ -50,11 +50,5 @@ func (cfg *apiConfig) handlerUsersCreate(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	respondWithJSON(w, http.StatusCreated, struct {
-		Id    int    `json:"id"`
-		Email string `json:"email"`
-	}{
-		Id:    user.Id,
-		Email: user.Email,
-	})
+	respondWithJSON(w, http.StatusCreated, user)
 }
