@@ -2,7 +2,6 @@ package main
 
 import (
 	"net/http"
-	"sort"
 	"strconv"
 
 	"github.com/raugustin93/Chirpy-go/internal/db"
@@ -15,8 +14,17 @@ func (cfg *apiConfig) handlerChirpsRetrieve(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
+	// authorIdString := r.URL.Query().Get("author_id")
+	// authorId, authorErr := strconv.Atoi(authorIdString)
+
+	sortString := r.URL.Query().Get("sort")
+
 	chirps := []db.Chirp{}
 	for _, dbChirp := range dbChirps {
+		// if authorErr != nil && authorId != dbChirp.AuthorId {
+		// 	continue
+		// }
+
 		chirps = append(chirps, db.Chirp{
 			Id:       dbChirp.Id,
 			Body:     dbChirp.Body,
@@ -24,9 +32,13 @@ func (cfg *apiConfig) handlerChirpsRetrieve(w http.ResponseWriter, r *http.Reque
 		})
 	}
 
-	sort.Slice(chirps, func(i, j int) bool {
-		return chirps[i].Id < chirps[j].Id
-	})
+	// sort.Slice(chirps, func(i, j int) bool {
+	// 	return chirps[i].Id < chirps[j].Id
+	// })
+
+	// log.Printf("Pre sort \n %v \n ", chirps)
+	chirps = cfg.DB.SortChirps(chirps, sortString)
+	// log.Printf("Post sort \n %v \n ", chirps)
 
 	respondWithJSON(w, http.StatusOK, chirps)
 }

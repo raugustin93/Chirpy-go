@@ -1,6 +1,9 @@
 package db
 
-import "errors"
+import (
+	"errors"
+	"sort"
+)
 
 func (db *DB) GetChirps() ([]Chirp, error) {
 	dbStructure, err := db.loadDB()
@@ -67,3 +70,18 @@ func (db *DB) DeleteChirp(id int) error {
 
 	return nil
 }
+
+func (db *DB) SortChirps(chirps []Chirp, direction string) []Chirp {
+	if direction == "desc" {
+		sort.Sort(sort.Reverse(ChirpSortedById(chirps)))
+	} else {
+		sort.Sort(ChirpSortedById(chirps))
+	}
+	return chirps
+}
+
+type ChirpSortedById []Chirp
+
+func (a ChirpSortedById) Len() int           { return len(a) }
+func (a ChirpSortedById) Swap(i, j int)      { a[i].Id, a[j].Id = a[j].Id, a[i].Id }
+func (a ChirpSortedById) Less(i, j int) bool { return a[i].Id < a[j].Id }
