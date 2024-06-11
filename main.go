@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/bootdotdev/go-api-gate/courses/learn-web-servers/sortchirp/internal/database"
 	"github.com/joho/godotenv"
+	"github.com/raugustin93/Chirpy-go/internal/database"
 )
 
 type apiConfig struct {

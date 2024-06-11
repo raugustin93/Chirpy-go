@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/bootdotdev/go-api-gate/courses/learn-web-servers/sortchirp/internal/auth"
+	"github.com/raugustin93/Chirpy-go/internal/auth"
 )
 
 type Chirp struct {

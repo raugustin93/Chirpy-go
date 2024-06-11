@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/bootdotdev/go-api-gate/courses/learn-web-servers/sortchirp/internal/auth"
+	"github.com/raugustin93/Chirpy-go/internal/auth"
 )
 
 func (cfg *apiConfig) handlerRefresh(w http.ResponseWriter, r *http.Request) {

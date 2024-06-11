@@ -5,8 +5,8 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/bootdotdev/go-api-gate/courses/learn-web-servers/sortchirp/internal/auth"
-	"github.com/bootdotdev/go-api-gate/courses/learn-web-servers/sortchirp/internal/database"
+	"github.com/raugustin93/Chirpy-go/internal/auth"
+	"github.com/raugustin93/Chirpy-go/internal/database"
 )
 
 func (cfg *apiConfig) handlerWebhook(w http.ResponseWriter, r *http.Request) {
